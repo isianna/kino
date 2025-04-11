@@ -1,0 +1,31 @@
+.seat {
+    width: 30px;
+    height: 30px;
+    margin: 5px;
+    background-color: green;
+    color: white;
+    text-align: center;
+    line-height: 30px;
+    border-radius: 5px;
+  }
+  .seat.selected {
+    background-color: orange;
+  }
+  .seat.occupied {
+    background-color: gray;
+  }
+  .row {
+    display: flex;
+    justify-content: center;
+  }
+  #seats-container {
+    margin: 20px 0;
+  }
+  .controls {
+    margin-top: 20px;
+  }
+  .ticket-type {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }

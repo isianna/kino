@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+	<meta charset="UTF-8">
+	<title>Rezerwacja miejsc kinowych</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<h2>Rezerwacja miejsc kinowych</h2>
+	<label>Liczba rzędów: <input type="number" id="rows" ></label>
+	<label>Miejsc w rzędzie: <input type="number" id="cols"></label><br>
+	<label>Cena normalna: <input type="number" id="cenaNormal" > zł</label>
+	<label>Cena ulgowa: <input type="number" id="cenaUlga" > zł</label>
+	<button onclick="generujSale()">Generuj salę</button>
+
+	<div id="siedzenia-kontener"></div>
+
+	<div id="wybor-typu-biletu" class="ticket-type" style="display:none">
+	<p> typ biletu <span id="wybrane-miejsce"></span>:</p>
+	<label><input type="radio" name="typ-biletu" value="normalny"> Normalny</label>
+	<label><input type="radio" name="typ-biletu" value="ulgowy"> Ulgowy</label>
+	<button onclick="typBiletu()">Zatwierdź</button>
+	</div>
+
+	<div class="controls">
+		<h3>miejsca:</h3>
+		<ul id="lista-rezerwacji"></ul>
+		<button onclick="rezerwuj()">Złóż zamówienie</button>
+		<p>Do zapłaty: <span id="suma-cen">0</span> zł</p>
+	</div>
+
+	<script>
+	const wynranemiejsca = [];
+	let obecnemiejsce = null;
+
+	function generujSale() {
+		const container = document.getElementById('siedzenia-kontener');
+		container.innerHTML = '';
+		wynranemiejsca.length = 0;
+		document.getElementById('wybor-typu-biletu').style.display = 'none';
+
+		const rows = parseInt(document.getElementById('rows').value);
+		const cols = parseInt(document.getElementById('cols').value);
+
+		for (let r = 1; r <= rows; r++) {
+			const rowDiv = document.createElement('div');
+			rowDiv.classList.add('row');
+			for (let c = 1; c <= cols; c++) {
+				const seat = document.createElement('div');
+				seat.classList.add('seat');
+				seat.textContent = r + '/' + c;
+				seat.dataset.row = r;
+				seat.dataset.col = c;
+				seat.onclick = function () {
+					siedzenie(seat, r, c);};
+				rowDiv.appendChild(seat);}
+			container.appendChild(rowDiv);}}
+
+	function siedzenie(seat, row, col) {
+		if (seat.classList.contains('occupied')) return;
+
+		if (seat.classList.contains('selected')) {
+			seat.classList.remove('selected');
+			for (let i = 0; i < wynranemiejsca.length; i++) {
+				if (wynranemiejsca[i].row === row && wynranemiejsca[i].col === col) {
+					wynranemiejsca.splice(i, 1);
+					break;}}
+			zarezerwuj();} else {
+			obecnemiejsce = { seatDiv: seat, row: row, col: col };
+			document.getElementById('wybrane-miejsce').textContent = row + '/' + col;
+			document.getElementById('wybor-typu-biletu').style.display = 'flex';}}
+
+	function typBiletu() {
+		const type = document.querySelector('input[name="typ-biletu"]:checked');
+		if (!type || !obecnemiejsce) return;
+
+		const seatDiv = obecnemiejsce.seatDiv;
+		const row = obecnemiejsce.row;
+		const col = obecnemiejsce.col;
+		seatDiv.classList.add('selected');
+		let miejsce = {
+			row: row,
+			col: col,
+			type: type.value};
+	wynranemiejsca.push(miejsce);
+		document.getElementById('wybor-typu-biletu').style.display = 'none';
+		document.querySelector('input[name="typ-biletu"]:checked').checked = false;
+		zarezerwuj();}
+
+	function zarezerwuj() {
+		const list = document.getElementById('lista-rezerwacji');
+		const cenaNormal = parseFloat(document.getElementById('cenaNormal').value);
+		const cenaUlga = parseFloat(document.getElementById('cenaUlga').value);
+		let total = 0;
+		list.innerHTML = '';
+
+		for (let i = 0; i < wynranemiejsca.length; i++) {
+			const seat = wynranemiejsca[i];
+			const li = document.createElement('li');
+			let price
+			if(seat.type ==='normalny'){
+				price = cenaNormal
+			}
+			else{
+				price = cenaUlga
+			}
+			li.textContent = seat.row + '. rząd, ' + seat.col + ' miejsce: ' + price + ' zł (' + seat.type + ')';
+			list.appendChild(li);
+			total += price;} document.getElementById('suma-cen').textContent = total;}
+
+	function rezerwuj() {
+	const seats = document.getElementsByClassName('seat');
+	for (let i = 0; i < wynranemiejsca.length; i++) {
+			const seatInfo = wynranemiejsca[i];
+		for (let j = 0; j < seats.length; j++) {
+				const el = seats[j];
+	if (el.textContent === seatInfo.row + '/' + seatInfo.col) {
+		el.classList.remove('selected');
+		el.classList.add('occupied');
+		break;
+				}}}
+		wynranemiejsca.length = 0;
+		zarezerwuj();
+	}
+	</script>
+</body>
+</html>
